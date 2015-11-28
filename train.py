@@ -40,6 +40,8 @@ def main():
 def train(args):
     data_loader = TextLoader(args.data_dir, args.batch_size, args.seq_length)
     model = Model(args, data_loader.vocab_size)
+    tf.get_variable_scope().reuse_variables()
+    inference_model = Model(args, data_loader.vocab_size, True)
     with tf.Session() as sess:
         tf.initialize_all_variables().run()
         saver = tf.train.Saver(tf.all_variables())
@@ -61,6 +63,7 @@ def train(args):
                     checkpoint_path = os.path.join(args.train_dir, 'model.ckpt')
                     saver.save(sess, checkpoint_path, global_step = e * data_loader.num_batches + b)
                     print "model saved to {}".format(checkpoint_path)
+                    print inference_model.sample(sess, data_loader)
 
 if __name__ == '__main__':
     main()
