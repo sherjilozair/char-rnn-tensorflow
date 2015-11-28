@@ -33,8 +33,6 @@ class TextLoader():
         with open(vocab_file, 'w') as f:
             cPickle.dump(self.chars, f)
         self.tensor = np.array(map(self.vocab.get, data))
-        self.num_batches = self.tensor.size / (self.batch_size * self.seq_length)
-        self.tensor = self.tensor[:self.num_batches * self.batch_size * self.seq_length]
         np.save(tensor_file, self.tensor)
 
     def load_preprocessed(self, vocab_file, tensor_file):
@@ -46,6 +44,8 @@ class TextLoader():
         self.num_batches = self.tensor.size / (self.batch_size * self.seq_length)
 
     def create_batches(self):
+        self.num_batches = self.tensor.size / (self.batch_size * self.seq_length)
+        self.tensor = self.tensor[:self.num_batches * self.batch_size * self.seq_length]
         xdata = self.tensor
         ydata = np.copy(self.tensor)
         ydata[:-1] = xdata[1:]

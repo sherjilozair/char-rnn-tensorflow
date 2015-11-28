@@ -39,12 +39,14 @@ def main():
 
 def train(args):
     data_loader = TextLoader(args.data_dir, args.batch_size, args.seq_length)
-    model = Model(args, data_loader.vocab_size)
+    args.vocab_size = data_loader.vocab_size
+    model = Model(args)
     tf.get_variable_scope().reuse_variables()
-    inference_model = Model(args, data_loader.vocab_size, True)
+    inference_model = Model(args, True)
     with tf.Session() as sess:
         tf.initialize_all_variables().run()
         saver = tf.train.Saver(tf.all_variables())
+
         for e in xrange(args.num_epochs):
             sess.run(tf.assign(model.lr, args.learning_rate * (args.decay_rate ** e)))
             data_loader.reset_batch_pointer()

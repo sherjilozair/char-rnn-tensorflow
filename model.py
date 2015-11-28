@@ -5,9 +5,8 @@ from tensorflow.models.rnn import seq2seq
 import numpy as np
 
 class Model():
-    def __init__(self, args, vocab_size, infer=False):
+    def __init__(self, args, infer=False):
         self.args = args
-        self.vocab_size = vocab_size
         if infer:
             args.batch_size = 1
             args.seq_length = 1
@@ -30,10 +29,10 @@ class Model():
         self.initial_state = cell.zero_state(args.batch_size, tf.float32)
 
         with tf.variable_scope('rnnlm'):
-            softmax_w = tf.get_variable("softmax_w", [args.rnn_size, vocab_size])
-            softmax_b = tf.get_variable("softmax_b", [vocab_size])
+            softmax_w = tf.get_variable("softmax_w", [args.rnn_size, args.vocab_size])
+            softmax_b = tf.get_variable("softmax_b", [args.vocab_size])
             with tf.device("/cpu:0"):
-                embedding = tf.get_variable("embedding", [vocab_size, args.rnn_size])
+                embedding = tf.get_variable("embedding", [args.vocab_size, args.rnn_size])
                 inputs = tf.split(1, args.seq_length, tf.nn.embedding_lookup(embedding, self.input_data))
                 inputs = [tf.squeeze(input_, [1]) for input_ in inputs]
 
@@ -49,7 +48,7 @@ class Model():
         loss = seq2seq.sequence_loss_by_example([self.logits],
                 [tf.reshape(self.targets, [-1])],
                 [tf.ones([args.batch_size * args.seq_length])],
-                vocab_size)
+                args.vocab_size)
         self.cost = tf.reduce_sum(loss) / args.batch_size / args.seq_length
         self.final_state = states[-1]
         self.lr = tf.Variable(0.0, trainable=False)
