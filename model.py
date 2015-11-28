@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow.models.rnn import rnn_cell
 from tensorflow.models.rnn import seq2seq
+from tensorflow.models.rnn import rnn
 
 import numpy as np
 
@@ -41,7 +42,8 @@ class Model():
             prev_symbol = tf.stop_gradient(tf.argmax(prev, 1))
             return tf.nn.embedding_lookup(embedding, prev_symbol)
 
-        outputs, states = seq2seq.rnn_decoder(inputs, self.initial_state, cell, loop_function=loop if infer else None, scope='rnnlm')
+        outputs, states = rnn.rnn(cell, inputs, dtype=tf.float32)
+        outputs, states = seq2seq.rnn_decoder(inputs, states[-1], cell, loop_function=loop if infer else None, scope='rnnlm')
         output = tf.reshape(tf.concat(1, outputs), [-1, args.rnn_size])
         self.logits = tf.nn.xw_plus_b(output, softmax_w, softmax_b)
         self.probs = tf.nn.softmax(self.logits)
