@@ -13,8 +13,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_dir', type=str, default='data/tinyshakespeare',
                        help='data directory containing input.txt')
-    parser.add_argument('--train_dir', type=str, default='models',
-                       help='model directory to store checkpointed models')
+    parser.add_argument('--save_dir', type=str, default='save',
+                       help='directory to store checkpointed models')
     parser.add_argument('--rnn_size', type=int, default=128,
                        help='size of RNN hidden state')
     parser.add_argument('--num_layers', type=int, default=2,
