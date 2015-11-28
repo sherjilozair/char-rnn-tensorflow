@@ -56,7 +56,7 @@ class Model():
         tvars = tf.trainable_variables()
         grads, _ = tf.clip_by_global_norm(tf.gradients(self.cost, tvars),
                 args.grad_clip)
-        optimizer = tf.train.GradientDescentOptimizer(self.lr)
+        optimizer = tf.train.AdamOptimizer(self.lr)
         self.train_op = optimizer.apply_gradients(zip(grads, tvars))
 
     def sample(self, sess, data_loader, num=200, start_char='T'):

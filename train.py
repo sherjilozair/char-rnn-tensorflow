@@ -20,19 +20,19 @@ def main():
                        help='number of layers in the RNN')
     parser.add_argument('--model', type=str, default='lstm',
                        help='rnn, gru, or lstm')
-    parser.add_argument('--batch_size', type=int, default=20,
+    parser.add_argument('--batch_size', type=int, default=50,
                        help='minibatch size')
-    parser.add_argument('--seq_length', type=int, default=20,
+    parser.add_argument('--seq_length', type=int, default=50,
                        help='RNN sequence length')
-    parser.add_argument('--num_epochs', type=int, default=20,
+    parser.add_argument('--num_epochs', type=int, default=50,
                        help='number of epochs')
     parser.add_argument('--save_every', type=int, default=1000,
                        help='save frequency')
     parser.add_argument('--grad_clip', type=float, default=5.,
                        help='clip gradients at this value')
-    parser.add_argument('--learning_rate', type=float, default=0.01,
+    parser.add_argument('--learning_rate', type=float, default=0.002,
                        help='learning rate')
-    parser.add_argument('--decay_rate', type=float, default=0.95,
+    parser.add_argument('--decay_rate', type=float, default=0.97,
                        help='decay rate for rmsprop')
     args = parser.parse_args()
     train(args)
@@ -46,7 +46,7 @@ def train(args):
         tf.initialize_all_variables().run()
         saver = tf.train.Saver(tf.all_variables())
         for e in xrange(args.num_epochs):
-            sess.run(tf.assign(model.lr, args.learning_rate))
+            sess.run(tf.assign(model.lr, args.learning_rate * (args.decay_rate ** e)))
             data_loader.reset_batch_pointer()
             state = model.initial_state.eval()
             for b in xrange(data_loader.num_batches):
