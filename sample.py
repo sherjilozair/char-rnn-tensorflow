@@ -13,6 +13,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--train_dir', type=str, default='models',
                        help='model directory to store checkpointed models')
+    parser.add_argument('-n', type=int, default=500,
+                       help='number of characters to sample')
+    parser.add_argument('--prime', type=string, default=' ',
+                       help='prime text')
     args = parser.parse_args()
     sample(args)
 
@@ -28,7 +32,7 @@ def sample(args):
         ckpt = tf.train.get_checkpoint_state(args.train_dir)
         if ckpt and ckpt.model_checkpoint_path:
             saver.restore(sess, ckpt.model_checkpoint_path)
-            print model.sample(sess, chars, vocab)
+            print model.sample(sess, chars, vocab, args.n, args.prime)
 
 if __name__ == '__main__':
     main()
