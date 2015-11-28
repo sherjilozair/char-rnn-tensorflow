@@ -58,19 +58,26 @@ class Model():
         optimizer = tf.train.AdamOptimizer(self.lr)
         self.train_op = optimizer.apply_gradients(zip(grads, tvars))
 
-    def sample(self, sess, chars, vocab, num=200, start_char='T'):
-        ret = ""
+    def sample(self, sess, chars, vocab, num=200, prime='The '):
         state = self.cell.zero_state(1, tf.float32).eval()
+        for char in prime[:-1]:
+            x = np.zeros((1, 1))
+            x[0, 0] = vocab[char]
+            feed = {self.input_data: x, self.initial_state:state}
+            [state] = sess.run([self.final_state], feed)
+
+        ret = prime
+        char = prime[-1]
         for n in xrange(num):
             x = np.zeros((1, 1))
-            x[0, 0] = vocab[start_char]
+            x[0, 0] = vocab[char]
             feed = {self.input_data: x, self.initial_state:state}
             [probs, state] = sess.run([self.probs, self.final_state], feed)
             p = probs[0]
             sample = int(np.random.choice(len(p), p=p))
             pred = chars[sample]
             ret += pred
-            start_char = pred
+            char = pred
         return ret
 
 
