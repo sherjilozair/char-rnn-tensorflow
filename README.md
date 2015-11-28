@@ -12,3 +12,6 @@ Every 1000 iterations, sampled output from the RNN will be printed.
 
 # Roadmap
 - Model serialization functionality, i.e. save and load models from disk
+- Add explanatory comments
+- Expose more command-line arguments
+- Compare accuracy and performance with char-rnn
