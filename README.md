@@ -11,7 +11,6 @@ To train with default parameters on the tinyshakespeare corpus, run `python trai
 
 To sample from a checkpointed model, `python sample.py`.
 # Roadmap
-- Model serialization functionality, i.e. save and load models from disk
 - Add explanatory comments
 - Expose more command-line arguments
 - Compare accuracy and performance with char-rnn
