@@ -25,21 +25,22 @@ class Model():
 
         self.cell = cell = rnn_cell.MultiRNNCell([cell] * args.num_layers)
 
+        self.input_data = tf.placeholder(tf.int32, [args.batch_size, args.seq_length])
+        self.targets = tf.placeholder(tf.int32, [args.batch_size, args.seq_length])
+        self.initial_state = cell.zero_state(args.batch_size, tf.float32)
+
         with tf.variable_scope('rnnlm'):
             softmax_w = tf.get_variable("softmax_w", [args.rnn_size, vocab_size])
             softmax_b = tf.get_variable("softmax_b", [vocab_size])
-            embedding = tf.get_variable("embedding", [vocab_size, args.rnn_size])
+            with tf.device("/cpu:0"):
+                embedding = tf.get_variable("embedding", [vocab_size, args.rnn_size])
+                inputs = tf.split(1, args.seq_length, tf.nn.embedding_lookup(embedding, self.input_data))
+                inputs = [tf.squeeze(input_, [1]) for input_ in inputs]
 
         def loop(prev, _):
             prev = tf.nn.xw_plus_b(prev, softmax_w, softmax_b)
             prev_symbol = tf.stop_gradient(tf.argmax(prev, 1))
             return tf.nn.embedding_lookup(embedding, prev_symbol)
-
-        self.input_data = tf.placeholder(tf.int32, [args.batch_size, args.seq_length])
-        self.targets = tf.placeholder(tf.int32, [args.batch_size, args.seq_length])
-        self.initial_state = cell.zero_state(args.batch_size, tf.float32)
-        inputs = tf.split(1, args.seq_length, tf.nn.embedding_lookup(embedding, self.input_data))
-        inputs = [tf.squeeze(input_, [1]) for input_ in inputs]
 
         outputs, states = seq2seq.rnn_decoder(inputs, self.initial_state, cell, loop_function=loop if infer else None, scope='rnnlm')
         output = tf.reshape(tf.concat(1, outputs), [-1, args.rnn_size])
