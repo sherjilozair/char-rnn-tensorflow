@@ -42,9 +42,9 @@ def train(args):
     data_loader = TextLoader(args.data_dir, args.batch_size, args.seq_length)
     args.vocab_size = data_loader.vocab_size
 
-    with open(os.path.join(args.train_dir, 'config.pkl'), 'w') as f:
+    with open(os.path.join(args.save_dir, 'config.pkl'), 'w') as f:
         cPickle.dump(args, f)
-    with open(os.path.join(args.train_dir, 'vocab.pkl'), 'w') as f:
+    with open(os.path.join(args.save_dir, 'vocab.pkl'), 'w') as f:
         cPickle.dump((data_loader.chars, data_loader.vocab), f)
 
     model = Model(args)
@@ -67,7 +67,7 @@ def train(args):
                             args.num_epochs * data_loader.num_batches,
                             e, train_loss, end - start)
                 if (e * data_loader.num_batches + b) % args.save_every == 0:
-                    checkpoint_path = os.path.join(args.train_dir, 'model.ckpt')
+                    checkpoint_path = os.path.join(args.save_dir, 'model.ckpt')
                     saver.save(sess, checkpoint_path, global_step = e * data_loader.num_batches + b)
                     print "model saved to {}".format(checkpoint_path)
 
