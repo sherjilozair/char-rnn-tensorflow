@@ -8,6 +8,7 @@ Inspired from Andrej Karpathy's [char-rnn](https://github.com/karpathy/char-rnn)
 
 # Basic Usage
 To train with default parameters on the tinyshakespeare corpus, run `python train.py`
+Every 1000 iterations, sampled output from the RNN will be printed.
 
 # Roadmap
 - Model serialization functionality, i.e. save and load models from disk
