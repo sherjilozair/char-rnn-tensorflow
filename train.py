@@ -48,8 +48,6 @@ def train(args):
         cPickle.dump((data_loader.chars, data_loader.vocab), f)
 
     model = Model(args)
-    tf.get_variable_scope().reuse_variables()
-    inference_model = Model(args, True)
 
     with tf.Session() as sess:
         tf.initialize_all_variables().run()
@@ -72,7 +70,6 @@ def train(args):
                     checkpoint_path = os.path.join(args.train_dir, 'model.ckpt')
                     saver.save(sess, checkpoint_path, global_step = e * data_loader.num_batches + b)
                     print "model saved to {}".format(checkpoint_path)
-                    print inference_model.sample(sess, data_loader.chars, data_loader.vocab)
 
 if __name__ == '__main__':
     main()
