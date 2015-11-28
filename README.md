@@ -7,7 +7,7 @@ Inspired from Andrej Karpathy's [char-rnn](https://github.com/karpathy/char-rnn)
 - [Tensorflow](http://www.tensorflow.org)
 
 # Basic Usage
-To train with default parameters on the tinyshakespeare corpus, run `python train.py`
+To train with default parameters on the tinyshakespeare corpus, run `python train.py`.
 Every 1000 iterations, sampled output from the RNN will be printed.
 
 # Roadmap
