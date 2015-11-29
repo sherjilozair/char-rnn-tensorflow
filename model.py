@@ -26,7 +26,7 @@ class Model():
         self.cell = cell = rnn_cell.MultiRNNCell([cell] * args.num_layers)
 
         self.input_data = tf.placeholder(tf.int32, [args.batch_size, args.seq_length])
-        self.targets = tf.placeholder(tf.int32, [args.batch_size, args.seq_length])
+        self.eps = tf.placeholder(tf.float32, [args.batch_size, 4*args.rnn_size])
         self.initial_state = cell.zero_state(args.batch_size, tf.float32)
 
         with tf.variable_scope('rnnlm'):
@@ -34,7 +34,8 @@ class Model():
             softmax_b = tf.get_variable("softmax_b", [args.vocab_size])
             with tf.device("/cpu:0"):
                 embedding = tf.get_variable("embedding", [args.vocab_size, args.rnn_size])
-                inputs = tf.split(1, args.seq_length, tf.nn.embedding_lookup(embedding, self.input_data))
+                inputs = tf.split(1, args.seq_length,
+                        tf.nn.embedding_lookup(embedding, self.input_data))
                 inputs = [tf.squeeze(input_, [1]) for input_ in inputs]
 
         def loop(prev, _):
@@ -43,15 +44,29 @@ class Model():
             return tf.nn.embedding_lookup(embedding, prev_symbol)
 
         outputs, states = rnn.rnn(cell, inputs, dtype=tf.float32)
-        outputs, states = seq2seq.rnn_decoder(inputs, states[-1], cell, loop_function=loop if infer else None, scope='rnnlm')
+        self.h = states[-1]
+        with tf.variable_scope('rnnlm'):
+            mu_w = tf.get_variable("mu_w", [4*args.rnn_size, 4*args.rnn_size])
+            mu_b = tf.get_variable("mu_b", [4*args.rnn_size])
+            sigma_w = tf.get_variable("sigma_w", [4*args.rnn_size, 4*args.rnn_size])
+            sigma_b = tf.get_variable("sigma_b", [4*args.rnn_size])
+
+        self.mu = tf.nn.xw_plus_b(self.h, mu_w, mu_b)
+        self.log_sigma = 0.5*tf.nn.xw_plus_b(self.h, sigma_w, sigma_b)
+        self.z = self.mu + tf.exp(self.log_sigma) * self.eps
+        outputs, states = seq2seq.rnn_decoder(inputs, self.z, cell,
+                loop_function=loop if infer else None, scope='rnnlm')
         output = tf.reshape(tf.concat(1, outputs), [-1, args.rnn_size])
         self.logits = tf.nn.xw_plus_b(output, softmax_w, softmax_b)
         self.probs = tf.nn.softmax(self.logits)
         loss = seq2seq.sequence_loss_by_example([self.logits],
-                [tf.reshape(self.targets, [-1])],
+                [tf.reshape(self.input_data, [-1])],
                 [tf.ones([args.batch_size * args.seq_length])],
                 args.vocab_size)
-        self.cost = tf.reduce_sum(loss) / args.batch_size / args.seq_length
+        self.prior_cost = 0.5 * tf.reduce_sum(- 1 - 2*self.log_sigma +
+                tf.pow(self.mu, 2) + tf.exp(2*self.log_sigma)) / args.batch_size
+        self.recons_cost = tf.reduce_sum(loss) / args.seq_length / args.batch_size
+        self.cost = self.recons_cost + self.prior_cost
         self.final_state = states[-1]
         self.lr = tf.Variable(0.0, trainable=False)
         tvars = tf.trainable_variables()

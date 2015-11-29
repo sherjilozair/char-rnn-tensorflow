@@ -58,14 +58,16 @@ def train(args):
             state = model.initial_state.eval()
             for b in xrange(data_loader.num_batches):
                 start = time.time()
-                x, y = data_loader.next_batch()
-                feed = {model.input_data: x, model.targets: y, model.initial_state: state}
-                train_loss, state, _ = sess.run([model.cost, model.final_state, model.train_op], feed)
+                x = data_loader.next_batch()
+                eps = np.random.randn(args.batch_size, 4*args.rnn_size)
+                feed = {model.input_data: x, model.eps: eps, model.initial_state: state}
+                recons, prior, state, _ = sess.run([model.recons_cost, model.prior_cost,
+                    model.final_state, model.train_op], feed)
                 end = time.time()
-                print "{}/{} (epoch {}), train_loss = {:.3f}, time/batch = {:.3f}" \
+                print "{}/{} (epoch {}), recons = {:.3f}, prior = {:.3f}, time/batch = {:.3f}" \
                     .format(e * data_loader.num_batches + b,
                             args.num_epochs * data_loader.num_batches,
-                            e, train_loss, end - start)
+                            e, recons, prior, end - start)
                 if (e * data_loader.num_batches + b) % args.save_every == 0:
                     checkpoint_path = os.path.join(args.save_dir, 'model.ckpt')
                     saver.save(sess, checkpoint_path, global_step = e * data_loader.num_batches + b)
