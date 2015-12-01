@@ -66,11 +66,6 @@ class Model():
             feed = {self.input_data: x, self.initial_state:state}
             [state] = sess.run([self.final_state], feed)
 
-        # EDIT BELOW:
-        # Reason for edit:  the sample line below requires the sum(p) == 1.
-        #  This is not the case always, due to int32 type rounding "errors".
-        #  Instead, let's implement a sampling algorithm that samples per
-        #  weighted p.
         def weighted_pick(weights):
             t = np.cumsum(weights)
             s = np.sum(weights)
