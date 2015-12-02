@@ -44,7 +44,7 @@ def train(args):
 
     with open(os.path.join(args.save_dir, 'config.pkl'), 'w') as f:
         cPickle.dump(args, f)
-    with open(os.path.join(args.save_dir, 'vocab.pkl'), 'w') as f:
+    with open(os.path.join(args.save_dir, 'chars_vocab.pkl'), 'w') as f:
         cPickle.dump((data_loader.chars, data_loader.vocab), f)
 
     model = Model(args)
