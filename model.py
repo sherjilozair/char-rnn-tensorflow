@@ -41,7 +41,7 @@ class Model():
             prev_symbol = tf.stop_gradient(tf.argmax(prev, 1))
             return tf.nn.embedding_lookup(embedding, prev_symbol)
 
-        outputs, states = seq2seq.rnn_decoder(inputs, self.initial_state, cell, loop_function=loop if infer else None, scope='rnnlm')
+        outputs, last_state = seq2seq.rnn_decoder(inputs, self.initial_state, cell, loop_function=loop if infer else None, scope='rnnlm')
         output = tf.reshape(tf.concat(1, outputs), [-1, args.rnn_size])
         self.logits = tf.nn.xw_plus_b(output, softmax_w, softmax_b)
         self.probs = tf.nn.softmax(self.logits)
@@ -50,7 +50,7 @@ class Model():
                 [tf.ones([args.batch_size * args.seq_length])],
                 args.vocab_size)
         self.cost = tf.reduce_sum(loss) / args.batch_size / args.seq_length
-        self.final_state = states[-1]
+        self.final_state = last_state
         self.lr = tf.Variable(0.0, trainable=False)
         tvars = tf.trainable_variables()
         grads, _ = tf.clip_by_global_norm(tf.gradients(self.cost, tvars),
