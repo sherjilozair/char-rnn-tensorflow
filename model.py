@@ -37,13 +37,13 @@ class Model():
                 inputs = [tf.squeeze(input_, [1]) for input_ in inputs]
 
         def loop(prev, _):
-            prev = tf.nn.xw_plus_b(prev, softmax_w, softmax_b)
+            prev = tf.matmul(prev, softmax_w) + softmax_b
             prev_symbol = tf.stop_gradient(tf.argmax(prev, 1))
             return tf.nn.embedding_lookup(embedding, prev_symbol)
 
         outputs, last_state = seq2seq.rnn_decoder(inputs, self.initial_state, cell, loop_function=loop if infer else None, scope='rnnlm')
         output = tf.reshape(tf.concat(1, outputs), [-1, args.rnn_size])
-        self.logits = tf.nn.xw_plus_b(output, softmax_w, softmax_b)
+        self.logits = tf.matmul(output, softmax_w) + softmax_b
         self.probs = tf.nn.softmax(self.logits)
         loss = seq2seq.sequence_loss_by_example([self.logits],
                 [tf.reshape(self.targets, [-1])],
