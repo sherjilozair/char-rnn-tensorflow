@@ -18,6 +18,9 @@ def main():
                        help='number of characters to sample')
     parser.add_argument('--prime', type=str, default=' ',
                        help='prime text')
+    parser.add_argument('--sample', type=int, default=1,
+                       help='0 to use max at each timestep, 1 to sample at each timestep, 2 to sample on spaces')
+
     args = parser.parse_args()
     sample(args)
 
@@ -33,7 +36,7 @@ def sample(args):
         ckpt = tf.train.get_checkpoint_state(args.save_dir)
         if ckpt and ckpt.model_checkpoint_path:
             saver.restore(sess, ckpt.model_checkpoint_path)
-            print(model.sample(sess, chars, vocab, args.n, args.prime))
+            print(model.sample(sess, chars, vocab, args.n, args.prime, args.sample))
 
 if __name__ == '__main__':
     main()
