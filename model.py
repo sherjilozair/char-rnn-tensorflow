@@ -58,7 +58,7 @@ class Model():
         optimizer = tf.train.AdamOptimizer(self.lr)
         self.train_op = optimizer.apply_gradients(zip(grads, tvars))
 
-    def sample(self, sess, chars, vocab, num=200, prime='The '):
+    def sample(self, sess, chars, vocab, num=200, prime='The ', sampling_type=1):
         state = self.cell.zero_state(1, tf.float32).eval()
         for char in prime[:-1]:
             x = np.zeros((1, 1))
@@ -79,8 +79,17 @@ class Model():
             feed = {self.input_data: x, self.initial_state:state}
             [probs, state] = sess.run([self.probs, self.final_state], feed)
             p = probs[0]
-            # sample = int(np.random.choice(len(p), p=p))
-            sample = weighted_pick(p)
+
+            if sampling_type == 0:
+                sample = np.argmax(p)
+            elif sampling_type == 2:
+                if char == ' ':
+                    sample = weighted_pick(p)
+                else:
+                    sample = np.argmax(p)
+            else: # sampling_type == 1 default:
+                sample = weighted_pick(p)
+
             pred = chars[sample]
             ret += pred
             char = pred
