@@ -101,7 +101,8 @@ def train(args):
                     .format(e * data_loader.num_batches + b,
                             args.num_epochs * data_loader.num_batches,
                             e, train_loss, end - start))
-                if (e * data_loader.num_batches + b) % args.save_every == 0:
+                if (e * data_loader.num_batches + b) % args.save_every == 0\
+                    or (e==args.num_epochs-1 and b == data_loader.num_batches-1): # save for the last result
                     checkpoint_path = os.path.join(args.save_dir, 'model.ckpt')
                     saver.save(sess, checkpoint_path, global_step = e * data_loader.num_batches + b)
                     print("model saved to {}".format(checkpoint_path))
