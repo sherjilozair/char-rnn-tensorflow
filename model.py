@@ -5,7 +5,7 @@ from tensorflow.models.rnn import seq2seq
 import numpy as np
 
 class Model():
-    def __init__(self, args, infer=False):
+    def __init__(self, args, infer=False, training=True):
         self.args = args
         if infer:
             args.batch_size = 1
@@ -22,6 +22,9 @@ class Model():
 
         cell = cell_fn(args.rnn_size)
 
+        if training and args.keep_prob < 1:
+            cell = rnn_cell.DropoutWrapper(cell, output_keep_prob=args.keep_prob)
+
         self.cell = cell = rnn_cell.MultiRNNCell([cell] * args.num_layers)
 
         self.input_data = tf.placeholder(tf.int32, [args.batch_size, args.seq_length])
@@ -33,7 +36,11 @@ class Model():
             softmax_b = tf.get_variable("softmax_b", [args.vocab_size])
             with tf.device("/cpu:0"):
                 embedding = tf.get_variable("embedding", [args.vocab_size, args.rnn_size])
-                inputs = tf.split(1, args.seq_length, tf.nn.embedding_lookup(embedding, self.input_data))
+                inputs = tf.nn.embedding_lookup(embedding, self.input_data)
+                if training and args.keep_prob < 1:
+                    inputs = tf.nn.dropout(inputs, args.keep_prob)
+
+                inputs = tf.split(1, args.seq_length, inputs)
                 inputs = [tf.squeeze(input_, [1]) for input_ in inputs]
 
         def loop(prev, _):
