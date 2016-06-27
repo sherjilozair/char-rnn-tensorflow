@@ -7,7 +7,7 @@ import numpy as np
 class Model():
     def __init__(self, args, training=True):
         self.args = args
-        if !training:
+        if not training:
             args.batch_size = 1
             args.seq_length = 1
 
@@ -48,7 +48,7 @@ class Model():
             prev_symbol = tf.stop_gradient(tf.argmax(prev, 1))
             return tf.nn.embedding_lookup(embedding, prev_symbol)
 
-        outputs, last_state = seq2seq.rnn_decoder(inputs, self.initial_state, cell, loop_function=loop if !training else None, scope='rnnlm')
+        outputs, last_state = seq2seq.rnn_decoder(inputs, self.initial_state, cell, loop_function=loop if not training else None, scope='rnnlm')
         output = tf.reshape(tf.concat(1, outputs), [-1, args.rnn_size])
         self.logits = tf.matmul(output, softmax_w) + softmax_b
         self.probs = tf.nn.softmax(self.logits)
