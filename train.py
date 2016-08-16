@@ -71,8 +71,8 @@ def train(args):
         # open saved vocab/dict and check if vocabs/dicts are compatible
         with open(os.path.join(args.init_from, 'chars_vocab.pkl')) as f:
             saved_chars, saved_vocab = cPickle.load(f)
-        assert saved_chars==data_loader.chars, "Data and loaded model disagreee on character set!"
-        assert saved_vocab==data_loader.vocab, "Data and loaded model disagreee on dictionary mappings!"
+        assert saved_chars==data_loader.chars, "Data and loaded model disagree on character set!"
+        assert saved_vocab==data_loader.vocab, "Data and loaded model disagree on dictionary mappings!"
         
     with open(os.path.join(args.save_dir, 'config.pkl'), 'wb') as f:
         cPickle.dump(args, f)
