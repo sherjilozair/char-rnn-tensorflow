@@ -59,7 +59,7 @@ class Model():
         self.train_op = optimizer.apply_gradients(zip(grads, tvars))
 
     def sample(self, sess, chars, vocab, num=200, prime='The ', sampling_type=1):
-        state = self.cell.zero_state(1, tf.float32).eval()
+        state = sess.run(self.cell.zero_state(1, tf.float32))
         for char in prime[:-1]:
             x = np.zeros((1, 1))
             x[0, 0] = vocab[char]
