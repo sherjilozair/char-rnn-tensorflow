@@ -20,9 +20,9 @@ class Model():
         else:
             raise Exception("model type not supported: {}".format(args.model))
 
-        cell = cell_fn(args.rnn_size)
+        cell = cell_fn(args.rnn_size, state_is_tuple=True)
 
-        self.cell = cell = rnn_cell.MultiRNNCell([cell] * args.num_layers)
+        self.cell = cell = rnn_cell.MultiRNNCell([cell] * args.num_layers, state_is_tuple=True)
 
         self.input_data = tf.placeholder(tf.int32, [args.batch_size, args.seq_length])
         self.targets = tf.placeholder(tf.int32, [args.batch_size, args.seq_length])
@@ -59,7 +59,7 @@ class Model():
         self.train_op = optimizer.apply_gradients(zip(grads, tvars))
 
     def sample(self, sess, chars, vocab, num=200, prime='The ', sampling_type=1):
-        state = self.cell.zero_state(1, tf.float32).eval()
+        state = sess.run(self.cell.zero_state(1, tf.float32))
         for char in prime[:-1]:
             x = np.zeros((1, 1))
             x[0, 0] = vocab[char]
