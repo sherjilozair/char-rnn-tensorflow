@@ -10,7 +10,8 @@ from model import Model
 from six import text_type
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+                       formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--save_dir', type=str, default='save',
                        help='model directory to store checkpointed models')
     parser.add_argument('-n', type=int, default=500,

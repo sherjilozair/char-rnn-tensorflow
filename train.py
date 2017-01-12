@@ -10,7 +10,8 @@ from utils import TextLoader
 from model import Model
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+                       formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--data_dir', type=str, default='data/tinyshakespeare',
                        help='data directory containing input.txt')
     parser.add_argument('--save_dir', type=str, default='save',
