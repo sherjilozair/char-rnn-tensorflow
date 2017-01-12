@@ -89,3 +89,7 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# char-rnn-tensorflow data files
+data.npy
+vocab.pkl
