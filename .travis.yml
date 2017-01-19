@@ -1,10 +1,9 @@
+dist: trusty
+
 language: python
 
 python:
- - pypy3
- - pypy
  - 2.7
- - 2.6
  - 3.6
  - 3.5
  - 3.4
@@ -14,11 +13,27 @@ python:
 sudo: false
 
 install:
+ - pip install -U pip
  - pip install pyflakes
+ - pip install coverage
+ - pip install tensorflow
+
+ # Make a smaller input file. Output won't look great, but runs much quicker.
+ - mkdir data/teenytinyshakespeare
+ - head -100 data/tinyshakespeare/input.txt > data/teenytinyshakespeare/input.txt
 
 script:
  - pyflakes .
+ - coverage erase
+ - coverage run --append --include=./* train.py --data_dir data/teenytinyshakespeare
+ - coverage run --append --include=./* train.py --data_dir data/teenytinyshakespeare --init_from save
+ - coverage run --append --include=./* sample.py
 
 after_script:
  - pip install pep8
  - pep8 --statistics --count .
+
+after_success:
+ - coverage report
+ - pip install coveralls
+ - coveralls
