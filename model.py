@@ -42,7 +42,7 @@ class Model():
             return tf.nn.embedding_lookup(embedding, prev_symbol)
 
         outputs, last_state = legacy_seq2seq.rnn_decoder(inputs, self.initial_state, cell, loop_function=loop if infer else None, scope='rnnlm')
-        output = tf.reshape(tf.concat_v2(outputs, 1), [-1, args.rnn_size])
+        output = tf.reshape(tf.concat(outputs, 1), [-1, args.rnn_size])
         self.logits = tf.matmul(output, softmax_w) + softmax_b
         self.probs = tf.nn.softmax(self.logits)
         loss = legacy_seq2seq.sequence_loss_by_example([self.logits],
