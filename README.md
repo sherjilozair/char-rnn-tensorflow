@@ -4,7 +4,7 @@ Multi-layer Recurrent Neural Networks (LSTM, RNN) for character-level language m
 Inspired from Andrej Karpathy's [char-rnn](https://github.com/karpathy/char-rnn).
 
 # Requirements
-- [Tensorflow](http://www.tensorflow.org)
+- [Tensorflow 1.0](http://www.tensorflow.org)
 
 # Basic Usage
 To train with default parameters on the tinyshakespeare corpus, run `python train.py`.
