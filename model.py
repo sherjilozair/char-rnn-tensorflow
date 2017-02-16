@@ -23,7 +23,8 @@ class Model():
 
         cell = cell_fn(args.rnn_size, state_is_tuple=True)
 
-        self.cell = cell = rnn.MultiRNNCell([cell] * args.num_layers, state_is_tuple=True)
+        self.cell = cell = rnn.MultiRNNCell([cell] * args.num_layers,
+                                            state_is_tuple=True)
 
         self.input_data = tf.placeholder(
             tf.int32, [args.batch_size, args.seq_length])
@@ -36,8 +37,11 @@ class Model():
                                         [args.rnn_size, args.vocab_size])
             softmax_b = tf.get_variable("softmax_b", [args.vocab_size])
             with tf.device("/cpu:0"):
-                embedding = tf.get_variable("embedding", [args.vocab_size, args.rnn_size])
-                inputs = tf.split(tf.nn.embedding_lookup(embedding, self.input_data), args.seq_length, 1)
+                embedding = tf.get_variable("embedding",
+                                            [args.vocab_size, args.rnn_size])
+                inputs = tf.split(
+                    tf.nn.embedding_lookup(embedding, self.input_data),
+                    args.seq_length, 1)
                 inputs = [tf.squeeze(input_, [1]) for input_ in inputs]
 
         def loop(prev, _):
@@ -45,11 +49,14 @@ class Model():
             prev_symbol = tf.stop_gradient(tf.argmax(prev, 1))
             return tf.nn.embedding_lookup(embedding, prev_symbol)
 
-        outputs, last_state = legacy_seq2seq.rnn_decoder(inputs, self.initial_state, cell, loop_function=loop if infer else None, scope='rnnlm')
+        outputs, last_state = legacy_seq2seq.rnn_decoder(
+            inputs, self.initial_state, cell,
+            loop_function=loop if infer else None, scope='rnnlm')
         output = tf.reshape(tf.concat(outputs, 1), [-1, args.rnn_size])
         self.logits = tf.matmul(output, softmax_w) + softmax_b
         self.probs = tf.nn.softmax(self.logits)
-        loss = legacy_seq2seq.sequence_loss_by_example([self.logits],
+        loss = legacy_seq2seq.sequence_loss_by_example(
+                [self.logits],
                 [tf.reshape(self.targets, [-1])],
                 [tf.ones([args.batch_size * args.seq_length])],
                 args.vocab_size)
