@@ -1,13 +1,15 @@
+import codecs
 import os
 import collections
 from six.moves import cPickle
 import numpy as np
 
 class TextLoader():
-    def __init__(self, data_dir, batch_size, seq_length):
+    def __init__(self, data_dir, batch_size, seq_length, encoding='utf-8'):
         self.data_dir = data_dir
         self.batch_size = batch_size
         self.seq_length = seq_length
+        self.encoding = encoding
 
         input_file = os.path.join(data_dir, "input.txt")
         vocab_file = os.path.join(data_dir, "vocab.pkl")
@@ -23,7 +25,7 @@ class TextLoader():
         self.reset_batch_pointer()
 
     def preprocess(self, input_file, vocab_file, tensor_file):
-        with open(input_file, "r") as f:
+        with codecs.open(input_file, "r", encoding=self.encoding) as f:
             data = f.read()
         counter = collections.Counter(data)
         count_pairs = sorted(counter.items(), key=lambda x: -x[1])
@@ -48,7 +50,7 @@ class TextLoader():
         self.num_batches = int(self.tensor.size / (self.batch_size *
                                                    self.seq_length))
 
-        # When the data (tesor) is too small, let's give them a better error message
+        # When the data (tensor) is too small, let's give them a better error message
         if self.num_batches==0:
             assert False, "Not enough data. Make seq_length and batch_size small."
 
