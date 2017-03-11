@@ -36,10 +36,10 @@ class Model():
         with tf.variable_scope('rnnlm'):
             softmax_w = tf.get_variable("softmax_w", [args.rnn_size, args.vocab_size])
             softmax_b = tf.get_variable("softmax_b", [args.vocab_size])
-            with tf.device("/cpu:0"):
-                embedding = tf.get_variable("embedding", [args.vocab_size, args.rnn_size])
-                inputs = tf.split(tf.nn.embedding_lookup(embedding, self.input_data), args.seq_length, 1)
-                inputs = [tf.squeeze(input_, [1]) for input_ in inputs]
+
+        embedding = tf.get_variable("embedding", [args.vocab_size, args.rnn_size])
+        inputs = tf.split(tf.nn.embedding_lookup(embedding, self.input_data), args.seq_length, 1)
+        inputs = [tf.squeeze(input_, [1]) for input_ in inputs]
 
         def loop(prev, _):
             prev = tf.matmul(prev, softmax_w) + softmax_b
