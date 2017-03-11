@@ -17,12 +17,17 @@ class Model():
             cell_fn = rnn.GRUCell
         elif args.model == 'lstm':
             cell_fn = rnn.BasicLSTMCell
+        elif args.model == 'nas':
+            cell_fn = rnn.NASCell
         else:
             raise Exception("model type not supported: {}".format(args.model))
 
-        cell = cell_fn(args.rnn_size, state_is_tuple=True)
+        cells = []
+        for _ in xrange(args.num_layers):
+            cell = cell_fn(args.rnn_size)
+            cells.append(cell)
 
-        self.cell = cell = rnn.MultiRNNCell([cell] * args.num_layers, state_is_tuple=True)
+        self.cell = cell = rnn.MultiRNNCell(cells, state_is_tuple=True)
 
         self.input_data = tf.placeholder(tf.int32, [args.batch_size, args.seq_length])
         self.targets = tf.placeholder(tf.int32, [args.batch_size, args.seq_length])
@@ -49,13 +54,21 @@ class Model():
                 [tf.reshape(self.targets, [-1])],
                 [tf.ones([args.batch_size * args.seq_length])])
         self.cost = tf.reduce_sum(loss) / args.batch_size / args.seq_length
+        with tf.name_scope('cost'):
+            self.cost = tf.reduce_sum(loss) / args.batch_size / args.seq_length
         self.final_state = last_state
         self.lr = tf.Variable(0.0, trainable=False)
         tvars = tf.trainable_variables()
         grads, _ = tf.clip_by_global_norm(tf.gradients(self.cost, tvars),
                 args.grad_clip)
-        optimizer = tf.train.AdamOptimizer(self.lr)
+        with tf.name_scope('optimizer'):
+            optimizer = tf.train.AdamOptimizer(self.lr)
         self.train_op = optimizer.apply_gradients(zip(grads, tvars))
+
+        # instrument tensorboard
+        tf.summary.histogram('logits', self.logits)
+        tf.summary.histogram('loss', loss)
+        tf.summary.scalar('train_loss', self.cost)
 
     def sample(self, sess, chars, vocab, num=200, prime='The ', sampling_type=1):
         state = sess.run(self.cell.zero_state(1, tf.float32))
@@ -93,5 +106,3 @@ class Model():
             ret += pred
             char = pred
         return ret
-
-
