@@ -23,7 +23,7 @@ class Model():
             raise Exception("model type not supported: {}".format(args.model))
 
         cells = []
-        for _ in xrange(args.num_layers):
+        for _ in range(args.num_layers):
             cell = cell_fn(args.rnn_size)
             cells.append(cell)
 
