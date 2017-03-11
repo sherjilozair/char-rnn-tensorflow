@@ -1,13 +1,10 @@
 from __future__ import print_function
-import numpy as np
 import tensorflow as tf
 
 import argparse
-import time
 import os
 from six.moves import cPickle
 
-from utils import TextLoader
 from model import Model
 
 from six import text_type
