@@ -47,8 +47,7 @@ class Model():
         self.probs = tf.nn.softmax(self.logits)
         loss = legacy_seq2seq.sequence_loss_by_example([self.logits],
                 [tf.reshape(self.targets, [-1])],
-                [tf.ones([args.batch_size * args.seq_length])],
-                args.vocab_size)
+                [tf.ones([args.batch_size * args.seq_length])])
         self.cost = tf.reduce_sum(loss) / args.batch_size / args.seq_length
         self.final_state = last_state
         self.lr = tf.Variable(0.0, trainable=False)
