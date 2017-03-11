@@ -35,8 +35,8 @@ def sample(args):
         ckpt = tf.train.get_checkpoint_state(args.save_dir)
         if ckpt and ckpt.model_checkpoint_path:
             saver.restore(sess, ckpt.model_checkpoint_path)
-            result=model.sample(sess, chars, vocab, args.n, args.prime, args.sample)
-            print(result.encode('utf8', 'replace'))
+            print(model.sample(sess, chars, vocab, args.n, args.prime,
+                               args.sample).encode('utf-8'))
 
 if __name__ == '__main__':
     main()
