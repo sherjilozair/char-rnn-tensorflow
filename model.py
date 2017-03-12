@@ -25,9 +25,10 @@ class Model():
         cells = []
         for _ in range(args.num_layers):
             cell = cell_fn(args.rnn_size)
-            if training and args.keep_prob < 1.0:
+            if training and (args.output_keep_prob < 1.0 or args.input_keep_prob < 1.0):
                 cell = rnn.DropoutWrapper(cell,
-                                          output_keep_prob=args.keep_prob)
+                                          input_keep_prob=args.input_keep_prob,
+                                          output_keep_prob=args.output_keep_prob)
             cells.append(cell)
 
         self.cell = cell = rnn.MultiRNNCell(cells, state_is_tuple=True)
@@ -42,8 +43,10 @@ class Model():
 
         embedding = tf.get_variable("embedding", [args.vocab_size, args.rnn_size])
         inputs = tf.nn.embedding_lookup(embedding, self.input_data)
-        if training and args.keep_prob < 1.0:
-            inputs = tf.nn.dropout(inputs, args.keep_prob)
+
+        # dropout beta testing: double check which one should affect next line
+        if training and args.output_keep_prob:
+            inputs = tf.nn.dropout(inputs, args.output_keep_prob)
 
         inputs = tf.split(inputs, args.seq_length, 1)
         inputs = [tf.squeeze(input_, [1]) for input_ in inputs]
