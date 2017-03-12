@@ -32,7 +32,7 @@ def sample(args):
         saved_args = cPickle.load(f)
     with open(os.path.join(args.save_dir, 'chars_vocab.pkl'), 'rb') as f:
         chars, vocab = cPickle.load(f)
-    model = Model(saved_args, True)
+    model = Model(saved_args, training=False)
     with tf.Session() as sess:
         tf.global_variables_initializer().run()
         saver = tf.train.Saver(tf.global_variables())
@@ -40,8 +40,7 @@ def sample(args):
         if ckpt and ckpt.model_checkpoint_path:
             saver.restore(sess, ckpt.model_checkpoint_path)
             print(model.sample(sess, chars, vocab, args.n, args.prime,
-                               args.sample))
-
+                               args.sample).encode('utf-8'))
 
 if __name__ == '__main__':
     main()
