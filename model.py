@@ -5,9 +5,9 @@ from tensorflow.contrib import legacy_seq2seq
 import numpy as np
 
 class Model():
-    def __init__(self, args, infer=False):
+    def __init__(self, args, training=True):
         self.args = args
-        if infer:
+        if not training:
             args.batch_size = 1
             args.seq_length = 1
 
@@ -25,6 +25,9 @@ class Model():
         cells = []
         for _ in range(args.num_layers):
             cell = cell_fn(args.rnn_size)
+            if training and args.keep_prob < 1.0:
+                cell = rnn.DropoutWrapper(cell,
+                                          output_keep_prob=args.keep_prob)
             cells.append(cell)
 
         self.cell = cell = rnn.MultiRNNCell(cells, state_is_tuple=True)
@@ -38,7 +41,11 @@ class Model():
             softmax_b = tf.get_variable("softmax_b", [args.vocab_size])
 
         embedding = tf.get_variable("embedding", [args.vocab_size, args.rnn_size])
-        inputs = tf.split(tf.nn.embedding_lookup(embedding, self.input_data), args.seq_length, 1)
+        inputs = tf.nn.embedding_lookup(embedding, self.input_data)
+        if training and args.keep_prob < 1.0:
+            inputs = tf.nn.dropout(inputs, args.keep_prob)
+
+        inputs = tf.split(inputs, args.seq_length, 1)
         inputs = [tf.squeeze(input_, [1]) for input_ in inputs]
 
         def loop(prev, _):
@@ -46,8 +53,10 @@ class Model():
             prev_symbol = tf.stop_gradient(tf.argmax(prev, 1))
             return tf.nn.embedding_lookup(embedding, prev_symbol)
 
-        outputs, last_state = legacy_seq2seq.rnn_decoder(inputs, self.initial_state, cell, loop_function=loop if infer else None, scope='rnnlm')
+        outputs, last_state = legacy_seq2seq.rnn_decoder(inputs, self.initial_state, cell, loop_function=loop if not training else None, scope='rnnlm')
         output = tf.reshape(tf.concat(outputs, 1), [-1, args.rnn_size])
+
+
         self.logits = tf.matmul(output, softmax_w) + softmax_b
         self.probs = tf.nn.softmax(self.logits)
         loss = legacy_seq2seq.sequence_loss_by_example([self.logits],
