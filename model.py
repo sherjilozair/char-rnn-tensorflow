@@ -4,6 +4,7 @@ from tensorflow.contrib import legacy_seq2seq
 
 import numpy as np
 
+
 class Model():
     def __init__(self, args, training=True):
         self.args = args
@@ -33,12 +34,15 @@ class Model():
 
         self.cell = cell = rnn.MultiRNNCell(cells, state_is_tuple=True)
 
-        self.input_data = tf.placeholder(tf.int32, [args.batch_size, args.seq_length])
-        self.targets = tf.placeholder(tf.int32, [args.batch_size, args.seq_length])
+        self.input_data = tf.placeholder(
+            tf.int32, [args.batch_size, args.seq_length])
+        self.targets = tf.placeholder(
+            tf.int32, [args.batch_size, args.seq_length])
         self.initial_state = cell.zero_state(args.batch_size, tf.float32)
 
         with tf.variable_scope('rnnlm'):
-            softmax_w = tf.get_variable("softmax_w", [args.rnn_size, args.vocab_size])
+            softmax_w = tf.get_variable("softmax_w",
+                                        [args.rnn_size, args.vocab_size])
             softmax_b = tf.get_variable("softmax_b", [args.vocab_size])
 
         embedding = tf.get_variable("embedding", [args.vocab_size, args.rnn_size])
@@ -62,7 +66,8 @@ class Model():
 
         self.logits = tf.matmul(output, softmax_w) + softmax_b
         self.probs = tf.nn.softmax(self.logits)
-        loss = legacy_seq2seq.sequence_loss_by_example([self.logits],
+        loss = legacy_seq2seq.sequence_loss_by_example(
+                [self.logits],
                 [tf.reshape(self.targets, [-1])],
                 [tf.ones([args.batch_size * args.seq_length])])
         self.cost = tf.reduce_sum(loss) / args.batch_size / args.seq_length
@@ -87,7 +92,7 @@ class Model():
         for char in prime[:-1]:
             x = np.zeros((1, 1))
             x[0, 0] = vocab[char]
-            feed = {self.input_data: x, self.initial_state:state}
+            feed = {self.input_data: x, self.initial_state: state}
             [state] = sess.run([self.final_state], feed)
 
         def weighted_pick(weights):
@@ -100,7 +105,7 @@ class Model():
         for n in range(num):
             x = np.zeros((1, 1))
             x[0, 0] = vocab[char]
-            feed = {self.input_data: x, self.initial_state:state}
+            feed = {self.input_data: x, self.initial_state: state}
             [probs, state] = sess.run([self.probs, self.final_state], feed)
             p = probs[0]
 
@@ -111,7 +116,7 @@ class Model():
                     sample = weighted_pick(p)
                 else:
                     sample = np.argmax(p)
-            else: # sampling_type == 1 default:
+            else:  # sampling_type == 1 default:
                 sample = weighted_pick(p)
 
             pred = chars[sample]
