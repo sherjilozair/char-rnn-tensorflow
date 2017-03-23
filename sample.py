@@ -17,7 +17,7 @@ def main():
                         help='model directory to store checkpointed models')
     parser.add_argument('-n', type=int, default=500,
                         help='number of characters to sample')
-    parser.add_argument('--prime', type=text_type, default=u' ',
+    parser.add_argument('--prime', type=text_type, default=u'',
                         help='prime text')
     parser.add_argument('--sample', type=int, default=1,
                         help='0 to use max at each timestep, 1 to sample at '
@@ -32,6 +32,9 @@ def sample(args):
         saved_args = cPickle.load(f)
     with open(os.path.join(args.save_dir, 'chars_vocab.pkl'), 'rb') as f:
         chars, vocab = cPickle.load(f)
+    #Use most frequent char if no prime is given
+    if args.prime == '':
+        args.prime = chars[0]
     model = Model(saved_args, training=False)
     with tf.Session() as sess:
         tf.global_variables_initializer().run()
