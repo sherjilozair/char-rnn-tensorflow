@@ -115,7 +115,6 @@ def train(args):
                 for i, (c, h) in enumerate(model.initial_state):
                     feed[c] = state[i].c
                     feed[h] = state[i].h
-                train_loss, state, _ = sess.run([model.cost, model.final_state, model.train_op], feed)
 
                 # instrument for tensorboard
                 summ, train_loss, state, _ = sess.run([summaries, model.cost, model.final_state, model.train_op], feed)
