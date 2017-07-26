@@ -52,8 +52,7 @@ class Model():
         if training and args.output_keep_prob:
             inputs = tf.nn.dropout(inputs, args.output_keep_prob)
 
-        inputs = tf.split(inputs, args.seq_length, 1)
-        inputs = [tf.squeeze(input_, [1]) for input_ in inputs]
+        inputs = tf.unstack(inputs, axis = 1)
 
         def loop(prev, _):
             prev = tf.matmul(prev, softmax_w) + softmax_b
