@@ -70,7 +70,6 @@ class Model():
                 [self.logits],
                 [tf.reshape(self.targets, [-1])],
                 [tf.ones([args.batch_size * args.seq_length])])
-        self.cost = tf.reduce_sum(loss) / args.batch_size / args.seq_length
         with tf.name_scope('cost'):
             self.cost = tf.reduce_sum(loss) / args.batch_size / args.seq_length
         self.final_state = last_state
