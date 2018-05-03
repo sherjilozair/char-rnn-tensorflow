@@ -34,8 +34,8 @@ script:
  - coverage run --append --include=./* sample.py --save_dir $SAVE_DIR_SECOND | tee $SAMPLE_FILE;test -s $SAMPLE_FILE
 
 after_script:
- - pip install pep8
- - pep8 --statistics --count .
+ - pip install pycodestyle
+ - pycodestyle --statistics --count .
  - pip freeze
 
 after_success:
