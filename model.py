@@ -14,11 +14,11 @@ class Model():
 
         # choose different rnn cell 
         if args.model == 'rnn':
-            cell_fn = rnn.BasicRNNCell
+            cell_fn = rnn.RNNCell
         elif args.model == 'gru':
             cell_fn = rnn.GRUCell
         elif args.model == 'lstm':
-            cell_fn = rnn.BasicLSTMCell
+            cell_fn = rnn.LSTMCell
         elif args.model == 'nas':
             cell_fn = rnn.NASCell
         else:
