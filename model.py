@@ -114,7 +114,7 @@ class Model():
 
         ret = prime
         char = prime[-1]
-        for n in range(num):
+        for _ in range(num):
             x = np.zeros((1, 1))
             x[0, 0] = vocab[char]
             feed = {self.input_data: x, self.initial_state: state}

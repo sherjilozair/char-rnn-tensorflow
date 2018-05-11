@@ -74,9 +74,8 @@ def train(args):
         assert os.path.isdir(args.init_from)," %s must be a a path" % args.init_from
         assert os.path.isfile(os.path.join(args.init_from,"config.pkl")),"config.pkl file does not exist in path %s"%args.init_from
         assert os.path.isfile(os.path.join(args.init_from,"chars_vocab.pkl")),"chars_vocab.pkl.pkl file does not exist in path %s" % args.init_from
-        ckpt = tf.train.get_checkpoint_state(args.init_from)
+        ckpt = tf.train.latest_checkpoint(args.init_from)
         assert ckpt, "No checkpoint found"
-        assert ckpt.model_checkpoint_path, "No model path found in checkpoint"
 
         # open old config and check if models are compatible
         with open(os.path.join(args.init_from, 'config.pkl'), 'rb') as f:
@@ -111,7 +110,7 @@ def train(args):
         saver = tf.train.Saver(tf.global_variables())
         # restore model
         if args.init_from is not None:
-            saver.restore(sess, ckpt.model_checkpoint_path)
+            saver.restore(sess, ckpt)
         for e in range(args.num_epochs):
             sess.run(tf.assign(model.lr,
                                args.learning_rate * (args.decay_rate ** e)))
